@@ -3,12 +3,9 @@
  */
 package learning.scafi.integration
 
-import acprograms.MyIncarnation.*
-import acprograms.BasicUsageProgram
-import acprograms.JavaFactory
-import scala.Tuple2
-import scala.collection.immutable.Map
-
+import acprograms.*
+import it.unibo.scafi.core.Core.Export
+import java.util.*
 
 class App {
     val greeting: String
@@ -20,22 +17,65 @@ class App {
 fun main(args: Array<String>) {
     println(App().greeting)
 
-    val program = BasicUsageProgram()
+    val program = BasicUsageProgram() // This program was defined in a Scala library
     val f = JavaFactory()
 
-    /*
-    import scala.collection.`Map$`.`MODULE$` as M
     // Simulate first round for device 0, with empty context
     //val c1 = factory().context(0, M.empty(), M.empty(), M.empty())
     val c1 = f.context(0, hashMapOf(), hashMapOf(), hashMapOf())
-    val e1 = program.round(c1, null)
+    val e1 = program.round(c1, { program.main() })
 
-    //val m: Map<Any,Any> = M.empty()
+    /*
+    val m: Map<Any,Any> = M.empty()
 
     // Simulate second round for device 0, with context given only by its previous export
     val c2 = factory().context(0, m.`$plus`(Tuple2.apply(0,e1)))
     val e2 = program.round(c2, null)
 
     // Print contexts and exports in output
-    println("c1=$c1\ne1=$e1\n\nc2=$c2\ne2=$e2")*/
+    println("c1=$c1\ne1=$e1\n\nc2=$c2\ne2=$e2")
+    */
+    val g = GradientProgram()
+
+    val nbrRange1: Map<Any,Any> = mapOf(1 to 0.0, 2 to 0.77)
+    val nbrRange2: Map<Any,Any> = mapOf(1 to 0.77, 2 to 0.0)
+    val c11 = ScafiContext(1,
+            mapOf(),
+            mapOf("source" to true),
+            mapOf("NBR_RANGE" to nbrRange1))
+    val e11: ScafiExport = g.executionRound(c11)
+    println("Export 1-1: " + e11.root<Any>())
+
+    val c21 = ScafiContext(2,
+            mapOf(1 to e11),
+            mapOf("source" to false),
+            mapOf("NBR_RANGE" to nbrRange2))
+    val e21: ScafiExport = g.executionRound(c21)
+    println("Export 2-1: " + e21.root<Any>())
+
+    val c12 = ScafiContext(1,
+            mapOf(1 to e11, 2 to e21),
+            mapOf("source" to true),
+            mapOf("NBR_RANGE" to nbrRange1))
+    val e12: ScafiExport = g.executionRound(c12)
+    println("Export 1-2: " + e12.root<Any>())
+
+    val c22 = ScafiContext(2,
+            mapOf(1 to e12, 2 to e21),
+            mapOf("source" to false),
+            mapOf("NBR_RANGE" to nbrRange2))
+    val e22: ScafiExport = g.executionRound(c22)
+    println("Export 2-2: " + e22.root<Any>() + " \n\n---\n" + c22 + "\n" + e22)
+}
+
+class GradientProgram : ScafiDSL<Double?>() {
+    override fun main(): Double {
+        return REP(Double.POSITIVE_INFINITY) { v: Double ->
+            MUX(sense("source"), 0.0,
+                    FOLDHOODplus(Double.POSITIVE_INFINITY, Math::min) {
+                        NBR { v } + NBRVAR<Double>("NBR_RANGE")
+                    }
+            )
+        }
+    }
 }

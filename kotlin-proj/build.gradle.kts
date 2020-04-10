@@ -15,6 +15,8 @@ repositories {
 dependencies {
     implementation("org.scala-lang:scala-library:2.12.8")
 
+    implementation("it.unibo.apice.scafiteam:scafi-core_2.12:0.3.2")
+
     implementation(project(":scala-proj"))
 
     // Use the Kotlin JDK 8 standard library.
