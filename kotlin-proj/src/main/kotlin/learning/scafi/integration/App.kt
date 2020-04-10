@@ -9,7 +9,6 @@ import acprograms.JavaFactory
 import scala.Tuple2
 import scala.collection.immutable.Map
 
-import scala.collection.`Map$`.`MODULE$` as M
 
 class App {
     val greeting: String
@@ -25,6 +24,7 @@ fun main(args: Array<String>) {
     val f = JavaFactory()
 
     /*
+    import scala.collection.`Map$`.`MODULE$` as M
     // Simulate first round for device 0, with empty context
     //val c1 = factory().context(0, M.empty(), M.empty(), M.empty())
     val c1 = f.context(0, hashMapOf(), hashMapOf(), hashMapOf())
