@@ -7,34 +7,19 @@ import acprograms.*
 import it.unibo.scafi.core.Core.Export
 import java.util.*
 
-class App {
-    val greeting: String
-        get() {
-            return "Hello world."
+class GradientProgram : ScafiDSL<Double?>() {
+    override fun main(): Double {
+        return REP(Double.POSITIVE_INFINITY) { v: Double ->
+            MUX(sense("source"), 0.0,
+                    FOLDHOODplus(Double.POSITIVE_INFINITY, Math::min) {
+                        NBR { v } + NBRVAR<Double>("NBR_RANGE")
+                    }
+            )
         }
+    }
 }
 
 fun main(args: Array<String>) {
-    println(App().greeting)
-
-    val program = BasicUsageProgram() // This program was defined in a Scala library
-    val f = JavaFactory()
-
-    // Simulate first round for device 0, with empty context
-    //val c1 = factory().context(0, M.empty(), M.empty(), M.empty())
-    val c1 = f.context(0, hashMapOf(), hashMapOf(), hashMapOf())
-    val e1 = program.round(c1, { program.main() })
-
-    /*
-    val m: Map<Any,Any> = M.empty()
-
-    // Simulate second round for device 0, with context given only by its previous export
-    val c2 = factory().context(0, m.`$plus`(Tuple2.apply(0,e1)))
-    val e2 = program.round(c2, null)
-
-    // Print contexts and exports in output
-    println("c1=$c1\ne1=$e1\n\nc2=$c2\ne2=$e2")
-    */
     val g = GradientProgram()
 
     val nbrRange1: Map<Any,Any> = mapOf(1 to 0.0, 2 to 0.77)
@@ -66,16 +51,29 @@ fun main(args: Array<String>) {
             mapOf("NBR_RANGE" to nbrRange2))
     val e22: ScafiExport = g.executionRound(c22)
     println("Export 2-2: " + e22.root<Any>() + " \n\n---\n" + c22 + "\n" + e22)
-}
 
-class GradientProgram : ScafiDSL<Double?>() {
-    override fun main(): Double {
-        return REP(Double.POSITIVE_INFINITY) { v: Double ->
-            MUX(sense("source"), 0.0,
-                    FOLDHOODplus(Double.POSITIVE_INFINITY, Math::min) {
-                        NBR { v } + NBRVAR<Double>("NBR_RANGE")
-                    }
-            )
-        }
-    }
+    /********************/
+    // THE FOLLOWING IS A DIFFERENT APPROACH: USE ScaFi directly without any adapter layer
+    val program = BasicUsageProgram() // This program was defined in a Scala library
+    val f = JavaFactory()
+
+    // Simulate first round for device 0, with empty context
+    //val c1 = factory().context(0, M.empty(), M.empty(), M.empty())
+    val c1 = f.context(0, hashMapOf(), hashMapOf(), hashMapOf())
+    val e1 = program.round(c1, { program.main() })
+
+    /*
+    val m: Map<Any,Any> = M.empty()
+
+    // Simulate second round for device 0, with context given only by its previous export
+    val c2 = factory().context(0, m.`$plus`(Tuple2.apply(0,e1)))
+    val e2 = program.round(c2, null)
+
+    // Print contexts and exports in output
+    println("c1=$c1
+    e1=$e1
+
+    c2=$c2
+    e2=$e2")
+    */
 }
